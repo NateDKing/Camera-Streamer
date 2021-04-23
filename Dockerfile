@@ -83,6 +83,13 @@ ENV INITSYSTEM on
 # Set our working directory
 WORKDIR /usr/src/app
 
+# Install pip
+RUN apt-get update && \
+    apt-get install -yq \
+    python3 \
+    python3-dev \
+    python3-pip 
+RUN pip3 install --upgrade pip
 
 # Copy requirements.txt first for better cache on later pushes
 COPY requirements.txt requirements.txt
@@ -97,4 +104,4 @@ COPY . ./
 ENV UDEV=1
 
 # main.py will run when container starts up on the device
-CMD ["python","-u","src/main.py"]
+CMD ["python3","-u","src/main.py"]

@@ -8,7 +8,7 @@ print("Fourth Line")
 
 app = Flask(__name__)
 
-cameraPort = 0
+cameraPort = 4
 
 camera = cv2.VideoCapture(cameraPort)  # use 0 for web camera
 #  for cctv camera use rtsp://username:password@ip_address:554/user=username_password='password'_channel=channel_number_stream=0.sdp' instead of camera
