@@ -19,24 +19,47 @@ RUN \
     libtiff-dev \
     libdc1394-22-dev -y --no-install-recommends && \
     echo "/usr/lib/aarch64-linux-gnu/tegra" > /etc/ld.so.conf.d/nvidia-tegra.conf && \
-    ldconfig && \
+    ldconfig
+    # wget https://github.com/opencv/opencv/archive/4.0.1.zip && \
+    # unzip 4.0.1.zip && \
+    # wget https://github.com/opencv/opencv_contrib/archive/4.0.1.zip -O opencv_modules.4.0.1.zip && \
+    # unzip opencv_modules.4.0.1.zip && rm opencv_modules.4.0.1.zip && \
+
+RUN \    
     wget https://github.com/opencv/opencv/archive/4.0.1.zip && \
-    unzip 4.0.1.zip && rm 4.0.1.zip
+    unzip 4.0.1.zip && \
+    wget https://github.com/opencv/opencv_contrib/archive/4.0.1.zip -O opencv_modules.4.0.1.zip && \
+    unzip opencv_modules.4.0.1.zip
 
 RUN \
-    wget https://github.com/opencv/opencv_contrib/archive/4.0.1.zip -O opencv_modules.4.0.1.zip && \
-    unzip opencv_modules.4.0.1.zip && rm opencv_modules.4.0.1.zip && \
     export CUDA_HOME=/usr/local/cuda-10.2/ && \
     export LD_LIBRARY_PATH=${CUDA_HOME}/lib64 && \
     PATH=${CUDA_HOME}/bin:${PATH} && export PATH && \
     mkdir -p opencv-4.0.1/build && cd opencv-4.0.1/build && \
-    cmake -D WITH_CUDA=ON -D CUDA_ARCH_BIN="5.3"  -D BUILD_LIST=cudev,highgui,videoio,cudaimgproc,ximgproc -D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib-4.0.1/modules -D CUDA_ARCH_PTX="" -D WITH_GSTREAMER=ON -D WITH_LIBV4L=ON -D BUILD_TESTS=ON -D BUILD_PERF_TESTS=ON -D BUILD_SAMPLES=ON -D BUILD_EXAMPLES=ON -D CMAKE_BUILD_TYPE=RELEASE -D WITH_GTK=on -D BUILD_DOCS=OFF -D CMAKE_INSTALL_PREFIX=/usr/local .. && make -j32 && make install && \
-    cp /usr/src/app/opencv-4.0.1/build/bin/opencv_version /usr/src/app/ && \
-    cp /usr/src/app/opencv-4.0.1/build/bin/example_ximgproc_paillou_demo /usr/src/app/ && \
-    cp /usr/src/app/opencv-4.0.1/build/bin/example_ximgproc_fourier_descriptors_demo /usr/src/app/ && \
-    cd /usr/src/app/ && rm -rf /usr/src/app/opencv-4.0.1 && \
-    mv opencv_contrib-4.0.1/samples/data/corridor.jpg /usr/src/app/ && \
-    rm -rf /usr/src/app/opencv_contrib-4.0.1
+    cmake \
+	-D WITH_CUDA=ON \
+	-D CUDA_ARCH_BIN=5.3,6.2,7.2 \
+	-D CUDA_ARCH_PTX= \
+	-D WITH_GSTREAMER=ON \
+	-D WITH_LIBV4L=ON \
+	-D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib-4.0.1/modules \
+	-D CMAKE_BUILD_TYPE=RELEASE \
+	-D CMAKE_INSTALL_PREFIX=$(python3 -c "import sys; print(sys.prefix)") \
+	-D PYTHON_EXECUTABLE=$(which python3) \
+	-D BUILD_EXAMPLES=OFF \
+        -D BUILD_opencv_python2=ON \
+        -D BUILD_opencv_python3=ON \
+        -D CUDA_FAST_MATH=ON \
+        -D CUDNN_VERSION='8.0' \
+        -D EIGEN_INCLUDE_PATH=/usr/include/eigen3 \
+        -D ENABLE_NEON=ON \
+        -D OPENCV_DNN_CUDA=ON \
+        -D OPENCV_ENABLE_NONFREE=ON \        
+        -D OPENCV_GENERATE_PKGCONFIG=ON \
+        -D WITH_CUBLAS=ON \        
+        -D WITH_CUDNN=ON \
+        -D WITH_OPENGL=ON .. && \
+    make -j2 && make install && ldconfig
 
 FROM balenalib/jetson-nano-ubuntu:bionic as final
 
@@ -96,6 +119,8 @@ COPY requirements.txt requirements.txt
 
 # pip install python deps from requirements.txt on the resin.io build server
 RUN pip install -r requirements.txt
+
+RUN pip list
 
 # This will copy all files in our root to the working  directory in the container
 COPY . ./
