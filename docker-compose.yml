@@ -1,0 +1,17 @@
+version: '2'
+
+services:
+  cuda:
+    restart: always
+    build: ./CUDA
+    privileged: true
+    
+  opencv:
+    restart: always
+    build: ./OPENCV
+    privileged: true
+      
+  main:
+    restart: always
+    build: ./MAIN
+    privileged: true

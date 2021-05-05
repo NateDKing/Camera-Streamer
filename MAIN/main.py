@@ -1,7 +1,7 @@
 print("first Line")
 from flask import Flask, render_template, Response
 print("Second Line")
-import cv2  
+from cv2 import cv2  
 print("Third Line")
 import time
 print("Fourth Line")
