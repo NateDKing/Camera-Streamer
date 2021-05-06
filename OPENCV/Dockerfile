@@ -30,7 +30,7 @@ RUN \
     export LD_LIBRARY_PATH=${CUDA_HOME}/lib64 && \
     PATH=${CUDA_HOME}/bin:${PATH} && export PATH && \
     mkdir -p opencv-4.0.1/build && cd opencv-4.0.1/build && \
-    cmake -D WITH_CUDA=ON -D CUDA_ARCH_BIN="5.3"  -D BUILD_LIST=cudev,highgui,videoio,cudaimgproc,ximgproc -D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib-4.0.1/modules -D CUDA_ARCH_PTX="" -D WITH_GSTREAMER=ON -D WITH_LIBV4L=ON -D BUILD_TESTS=ON -D BUILD_PERF_TESTS=ON -D BUILD_SAMPLES=ON -D BUILD_EXAMPLES=ON -D CMAKE_BUILD_TYPE=RELEASE -D WITH_GTK=on -D BUILD_DOCS=OFF -D CMAKE_INSTALL_PREFIX=/usr/local .. && make -j32 && make install && \
+    cmake -D WITH_CUDA=ON -D CUDA_ARCH_BIN="5.3"  -D BUILD_LIST=cudev,highgui,videoio,cudaimgproc,ximgproc -D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib-4.0.1/modules -D CUDA_ARCH_PTX="" -D WITH_GSTREAMER=ON -D WITH_LIBV4L=ON -D BUILD_TESTS=ON -D BUILD_PERF_TESTS=ON -D BUILD_SAMPLES=ON -D BUILD_EXAMPLES=ON -D CMAKE_BUILD_TYPE=RELEASE -D WITH_GTK=on -D BUILD_DOCS=OFF  -D BUILD_opencv_python3=ON -D PYTHON3_EXECUTABLE=$ -D CMAKE_INSTALL_PREFIX=/usr/local .. && make -j32 && make install && \
     cp /usr/src/app/opencv-4.0.1/build/bin/opencv_version /usr/src/app/ && \
     cp /usr/src/app/opencv-4.0.1/build/bin/example_ximgproc_paillou_demo /usr/src/app/ && \
     cp /usr/src/app/opencv-4.0.1/build/bin/example_ximgproc_fourier_descriptors_demo /usr/src/app/ && \
@@ -79,4 +79,25 @@ ENV LD_LIBRARY_PATH=/usr/local/lib
 
 WORKDIR /usr/src/app/
 
-CMD [ "sleep", "infinity" ]
+# Install pip
+RUN apt-get update && \
+    apt-get install -yq \
+    python3.8 \
+    python3-dev \
+    python3-pip 
+RUN pip3 install --upgrade pip
+
+# Copy requirements.txt first for better cache on later pushes
+COPY requirements.txt requirements.txt
+
+# pip install python deps from requirements.txt on the resin.io build server
+RUN pip install -r requirements.txt
+
+# This will copy all files in our root to the working  directory in the container
+COPY . ./
+
+# Enable udevd so that plugged dynamic hardware devices show up in our container.
+ENV UDEV=1
+
+CMD ["python3","-u","main.py"]
+# CMD [ "sleep", "infinity" ]
