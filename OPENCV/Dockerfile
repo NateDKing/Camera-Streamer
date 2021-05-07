@@ -38,21 +38,21 @@ RUN \
     mv opencv_contrib-4.0.1/samples/data/corridor.jpg /usr/src/app/ && \
     rm -rf /usr/src/app/opencv_contrib-4.0.1
 
-FROM balenalib/jetson-nano-ubuntu:bionic as final
+# FROM balenalib/jetson-nano-ubuntu:bionic as final
 
-# Starting with a fresh new base image, but with access to files in previous build
+# # Starting with a fresh new base image, but with access to files in previous build
 
-# Uncomment if planning to use libs from here
-#COPY --from=buildstep /usr/local/cuda-10.2 /usr/local/cuda-10.2
+# # Uncomment if planning to use libs from here
+# #COPY --from=buildstep /usr/local/cuda-10.2 /usr/local/cuda-10.2
 
-# Minimum CUDA runtime libraries
-COPY --from=buildstep /usr/lib/aarch64-linux-gnu /usr/lib/aarch64-linux-gnu
+# # Minimum CUDA runtime libraries
+# COPY --from=buildstep /usr/lib/aarch64-linux-gnu /usr/lib/aarch64-linux-gnu
 
-# OpenCV runtime libraries
-COPY --from=buildstep /usr/local/lib /usr/local/lib
+# # OpenCV runtime libraries
+# COPY --from=buildstep /usr/local/lib /usr/local/lib
 
-# Demo apps
-COPY --from=buildstep /usr/src/app/ /usr/src/app/
+# # Demo apps
+# COPY --from=buildstep /usr/src/app/ /usr/src/app/
 
 ENV DEBIAN_FRONTEND noninteractive
 
