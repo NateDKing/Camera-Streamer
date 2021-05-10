@@ -10,8 +10,3 @@ services:
     restart: always
     build: ./OPENCV
     privileged: true
-      
-  main:
-    restart: always
-    build: ./MAIN
-    privileged: true

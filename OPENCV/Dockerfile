@@ -99,5 +99,5 @@ COPY . ./
 # Enable udevd so that plugged dynamic hardware devices show up in our container.
 ENV UDEV=1
 
-CMD ["python3","-u","main.py"]
-# CMD [ "sleep", "infinity" ]
+# CMD ["python3","-u","main.py"]
+CMD [ "sleep", "infinity" ]
